@@ -23,7 +23,15 @@ while IFS= read -r issue_num; do
         num=$(jq -r '.number' <<< "$issue_json")
         title=$(jq -r '.title // ""' <<< "$issue_json")
         body_raw=$(jq -r '.body // ""' <<< "$issue_json")
-        labels=$(jq -r '[.labels[]?.name] | join(", ")' <<<"$issue_json")
+        labels=$(
+            jq -r '
+                ( .labels.nodes? // .labels // [] )
+                | map( if type=="object" then (.name // "") else . end )
+                | map(select(. != ""))     # drop empties
+                | unique                   # de-dup
+                | join(", ")
+            ' <<<"$issue_json"
+        )
     else
         num="$issue_num"; title=""; body_raw=""; labels=""
     fi

@@ -8,7 +8,14 @@ ensure_dir "$WORKDIR"
 PR_TITLE=$(jq -r '.pull_request.title // ""' "$GITHUB_EVENT_PATH")
 PR_BODY_RAW=$(jq -r '.pull_request.body // ""' "$GITHUB_EVENT_PATH")
 PR_NUMBER=$(jq -r '.pull_request.number // empty' "$GITHUB_EVENT_PATH")
-PR_LABELS=$(jq -r '.pull_request.labels[]?.name' "$GITHUB_EVENT_PATH" || true)
+PR_LABELS=$(
+  jq -r '
+    ( .pull_request.labels // [] )
+    | ( if type=="object" and has("nodes") then .nodes else . end )
+    | map( if type=="object" then (.name // empty) else . end )
+    | map(select(. != "")) | unique | join(", ")
+  ' "$GITHUB_EVENT_PATH"
+)
 [ -z "${PR_NUMBER:-}" ] && die "No pull_request context. Run on pull_request events."
 
 
