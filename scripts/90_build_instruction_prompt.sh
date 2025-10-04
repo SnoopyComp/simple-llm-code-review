@@ -73,7 +73,11 @@ EOF
 **Goal:** Ensure both **safety and efficiency** of the code.  
 
 Scope of review:
-- All critical issues covered in Essential level
+- Bugs that can cause runtime errors
+- Security vulnerabilities
+- Clear logic flaws
+- Risk of data loss
+- Incorrect API usage or missing exception handling
 - Inefficient operations or algorithms that may hurt performance
 - Memory waste or unnecessary computations
 - Duplicate code or structural flaws affecting maintainability
@@ -88,7 +92,15 @@ EOF
 **Goal:** Provide a **comprehensive quality review** of the code.  
 
 Scope of review:
-- All issues from Essential and Balanced levels
+- Bugs that can cause runtime errors
+- Security vulnerabilities
+- Clear logic flaws
+- Risk of data loss
+- Incorrect API usage or missing exception handling
+- Inefficient operations or algorithms that may hurt performance
+- Memory waste or unnecessary computations
+- Duplicate code or structural flaws affecting maintainability
+- Refactoring opportunities that improve stability and efficiency
 - Performance, scalability, and resource efficiency
 - Code structure, modularity, and maintainability
 - Naming conventions for variables, functions, and classes
