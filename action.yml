@@ -1,0 +1,170 @@
+name: "Simple LLM Code review"
+description: "Simple LLM CodeReview"
+author: "SnoopyComp"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Prepare workdir
+      id: prep
+      shell: bash
+      run: |
+        set -euo pipefail
+        dir="${RUNNER_TEMP}/llm_prompt"
+        mkdir -p "$dir"
+        echo "workdir=$dir" >> "$GITHUB_OUTPUT"
+        echo "WORKDIR=$dir" >> "$GITHUB_ENV"
+
+    - name: Normalize cost
+      shell: bash
+      env:
+        COST_INPUT: ${{ inputs.cost }}
+      run: |
+        set -euo pipefail
+        ci="${COST_INPUT,,}"
+        case "$ci" in
+          high|middle|low) COST="$ci" ;;
+          normal|nomal)    COST="middle" ;;  # common typo/alias → middle
+          *) echo "[WARN] invalid cost='${COST_INPUT}'; falling back to 'middle'"; COST="middle" ;;
+        esac
+        echo "COST=$COST" >> "$GITHUB_ENV"
+
+    - name: Read PR from event payload
+      shell: bash
+      env:
+        WORKDIR: ${{ steps.prep.outputs.workdir }}
+        MAX_BYTES_PR: ${{ inputs.max-bytes-pr }}
+      run: bash "$GITHUB_ACTION_PATH/scripts/10_read_pr.sh"
+
+    - name: Extract issue numbers
+      id: issues
+      shell: bash
+      env:
+        WORKDIR: ${{ steps.prep.outputs.workdir }}
+      run: bash "$GITHUB_ACTION_PATH/scripts/20_extract_issue_numbers.sh"
+
+    - name: Extract reference paths
+      id: references
+      shell: bash
+      env:
+        WORKDIR: ${{ steps.prep.outputs.workdir }}
+      run: bash "$GITHUB_ACTION_PATH/scripts/30_extract_reference_paths.sh"
+
+    - name: Normalize reference list filename
+      if: steps.references.outputs.found == 'true'
+      shell: bash
+      env:
+        WORKDIR: ${{ steps.prep.outputs.workdir }}
+      run: |
+        set -euo pipefail
+        if [ -s "$WORKDIR/refs_path.txt" ]; then
+          cp "$WORKDIR/refs_path.txt" "$WORKDIR/refs.txt"
+        fi
+
+    - name: Fetch issues
+      if: steps.issues.outputs.found == 'true'
+      shell: bash
+      env:
+        WORKDIR: ${{ steps.prep.outputs.workdir }}
+        MAX_BYTES_ISSUE: ${{ inputs.max-bytes-issue }}
+        GITHUB_TOKEN: ${{ github.token }}
+        GH_TOKEN: ${{ github.token }}
+      run: bash "$GITHUB_ACTION_PATH/scripts/40_fetch_issues.sh"
+
+    - name: Read reference files
+      if: steps.references.outputs.found == 'true'
+      shell: bash
+      env:
+        WORKDIR: ${{ steps.prep.outputs.workdir }}
+        MAX_BYTES_REF: ${{ inputs.max-bytes-ref }}
+      run: bash "$GITHUB_ACTION_PATH/scripts/50_read_references.sh"
+
+    - name: Build instruction section (90)
+      shell: bash
+      env:
+        WORKDIR: ${{ steps.prep.outputs.workdir }}
+        OUT: ${{ steps.prep.outputs.workdir }}/_instruction.md
+        MODEL_COST: ${{ env.COST }}
+        REVIEW_DEPTH: ${{ inputs.review-depth }}
+        USE_INLINE_COMMENT: ${{ inputs.use-inline-review }}
+        LANGUAGE: ${{ inputs.language }}
+        USE_ISSUE: ${{ steps.issues.outputs.found }}
+        USE_REFERENCE: ${{ steps.references.outputs.found }}
+        REVIEW_INSTRUCTIONS: ${{ inputs.instructions }}
+      run: bash "$GITHUB_ACTION_PATH/scripts/90_build_instruction_prompt.sh"
+
+    - name: Build info section (99)
+      shell: bash
+      env:
+        WORKDIR: ${{ steps.prep.outputs.workdir }}
+        OUT: ${{ steps.prep.outputs.workdir }}/_info.md
+        USE_ISSUE: ${{ steps.issues.outputs.found }}
+        USE_REFERENCE: ${{ steps.references.outputs.found }}
+      run: bash "$GITHUB_ACTION_PATH/scripts/99_build_info_prompt.sh"
+
+    - name: Assemble final prompt & set outputs
+      id: finalize
+      shell: bash
+      env:
+        WORKDIR: ${{ steps.prep.outputs.workdir }}
+        OUT: ${{ inputs.output-file }}
+      run: |
+        set -euo pipefail
+        mkdir -p "$(dirname "$OUT")"
+        cat "$WORKDIR/_instruction.md" "$WORKDIR/_info.md" > "$OUT"
+        echo "prompt-path=$OUT" >> "$GITHUB_OUTPUT"
+        {
+          printf "prompt<<__PROMPT__\n"
+          cat "$OUT"
+          printf "\n__PROMPT__\n"
+        } >> "$GITHUB_OUTPUT"
+
+inputs:
+  output-file:
+    description: "Relative path to write the assembled prompt markdown."
+    required: false
+    default: "llm_review_prompt.md"
+  language:
+    description: "Review language for all comments."
+    required: false
+    default: "English"
+  cost:
+    description: "Model cost level (choose: high | middle | low)"
+    required: false
+    default: "low"
+  use-inline-review:
+    description: "Whether to use inline review comments (true/false)."
+    required: false
+    default: "true"
+  review-depth:
+    description: "Review depth (choose: essential | balanced | thorough)"
+    required: false
+    default: "balanced"
+  max-bytes-pr:
+    description: "Maximum bytes to include from PR body."
+    required: false
+    default: "100000"
+  max-bytes-issue:
+    description: "Maximum bytes to include from each Issue body."
+    required: false
+    default: "80000"
+  max-bytes-ref:
+    description: "Maximum bytes to include from each Reference file."
+    required: false
+    default: "120000"
+  instructions:
+    description: "Additional review instructions to include at the top of the prompt."
+    required: false
+    default: ""
+
+outputs:
+  prompt:
+    description: "The assembled prompt text"
+    value: ${{ steps.finalize.outputs.prompt }}
+  prompt-path:
+    description: "Written prompt file path"
+    value: ${{ steps.finalize.outputs.prompt-path }}
+
+branding:
+  icon: "book-open"
+  color: "purple"
