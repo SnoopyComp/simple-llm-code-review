@@ -15,8 +15,15 @@ runs:
         echo "workdir=$dir" >> "$GITHUB_OUTPUT"
         echo "WORKDIR=$dir" >> "$GITHUB_ENV"
         echo "PROMPTDIR=$GITHUB_ACTION_PATH/prompt" >> "$GITHUB_ENV"
+        echo "WORKFLOWDIR=$GITHUB_ACTION_PATH/workflow" >> "$GITHUB_ENV"
+
+    - name: Check trigger (@claude)
+      id: gate
+      shell: bash
+      run: bash "$WORKFLOWDIR/10_check_run.sh"
 
     - name: Normalize cost
+      if: ${{ inputs.force-run == 'true' || steps.gate.outputs.run == 'true' }}
       shell: bash
       env:
         COST_INPUT: ${{ inputs.cost }}
@@ -29,22 +36,35 @@ runs:
           *) echo "[WARN] invalid cost='${COST_INPUT}'; falling back to 'middle'"; COST="middle" ;;
         esac
         echo "COST=$COST" >> "$GITHUB_ENV"
+        
+    - name: Select model/turns/tools
+      if: ${{ inputs.force-run == 'true' || steps.gate.outputs.run == 'true' }}
+      id: select
+      shell: bash
+      env:
+        COST: ${{ env.COST }}
+        REVIEW_DEPTH: ${{ inputs.review-depth }}
+        MAX_TURNS_INPUT: ${{ inputs.max-turns }}
+      run: bash "$WORKFLOWDIR/20_set_arguments.sh"
 
-    - name: Read PR from event payload
+    - name: Read PR from event payload (10)
+      if: ${{ inputs.force-run == 'true' || steps.gate.outputs.run == 'true' }}
       shell: bash
       env:
         WORKDIR: ${{ steps.prep.outputs.workdir }}
         MAX_BYTES_PR: ${{ inputs.max-bytes-pr }}
       run: bash "$PROMPTDIR/10_read_pr.sh"
 
-    - name: Extract issue numbers
+    - name: Extract issue numbers (20)
+      if: ${{ inputs.force-run == 'true' || steps.gate.outputs.run == 'true' }}
       id: issues
       shell: bash
       env:
         WORKDIR: ${{ steps.prep.outputs.workdir }}
       run: bash "$PROMPTDIR/20_extract_issue_numbers.sh"
 
-    - name: Extract reference paths
+    - name: Extract reference paths (30)
+      if: ${{ inputs.force-run == 'true' || steps.gate.outputs.run == 'true' }}
       id: references
       shell: bash
       env:
@@ -52,7 +72,7 @@ runs:
       run: bash "$PROMPTDIR/30_extract_reference_paths.sh"
 
     - name: Normalize reference list filename
-      if: steps.references.outputs.found == 'true'
+      if: ${{ (inputs.force-run == 'true' || steps.gate.outputs.run == 'true') && steps.references.outputs.found == 'true' }}
       shell: bash
       env:
         WORKDIR: ${{ steps.prep.outputs.workdir }}
@@ -62,8 +82,8 @@ runs:
           cp "$WORKDIR/refs_path.txt" "$WORKDIR/refs.txt"
         fi
 
-    - name: Fetch issues
-      if: steps.issues.outputs.found == 'true'
+    - name: Fetch issues (40)
+      if: ${{ (inputs.force-run == 'true' || steps.gate.outputs.run == 'true') && steps.issues.outputs.found == 'true' }}
       shell: bash
       env:
         WORKDIR: ${{ steps.prep.outputs.workdir }}
@@ -72,8 +92,8 @@ runs:
         GH_TOKEN: ${{ github.token }}
       run: bash "$PROMPTDIR/40_fetch_issues.sh"
 
-    - name: Read reference files
-      if: steps.references.outputs.found == 'true'
+    - name: Read reference files (50)
+      if: ${{ (inputs.force-run == 'true' || steps.gate.outputs.run == 'true') && steps.references.outputs.found == 'true' }}
       shell: bash
       env:
         WORKDIR: ${{ steps.prep.outputs.workdir }}
@@ -81,6 +101,7 @@ runs:
       run: bash "$PROMPTDIR/50_read_references.sh"
 
     - name: Build instruction section (90)
+      if: ${{ inputs.force-run == 'true' || steps.gate.outputs.run == 'true' }}
       shell: bash
       env:
         WORKDIR: ${{ steps.prep.outputs.workdir }}
@@ -95,6 +116,7 @@ runs:
       run: bash "$PROMPTDIR/90_build_instruction_prompt.sh"
 
     - name: Build info section (99)
+      if: ${{ inputs.force-run == 'true' || steps.gate.outputs.run == 'true' }}
       shell: bash
       env:
         WORKDIR: ${{ steps.prep.outputs.workdir }}
@@ -104,6 +126,7 @@ runs:
       run: bash "$PROMPTDIR/99_build_info_prompt.sh"
 
     - name: Assemble final prompt & set outputs
+      if: ${{ inputs.force-run == 'true' || steps.gate.outputs.run == 'true' }}
       id: finalize
       shell: bash
       env:
@@ -119,6 +142,21 @@ runs:
           cat "$OUT"
           printf "\n__PROMPT__\n"
         } >> "$GITHUB_OUTPUT"
+
+    - name: Run Claude Code review
+      if: ${{ inputs.force-run == 'true' || steps.gate.outputs.run == 'true' }}
+      uses: anthropics/claude-code-action@v1
+      with:
+        anthropic_api_key: ${{ inputs.anthropic-api-key }}
+        github_token: ${{ github.token }}
+        prompt: ${{ steps.finalize.outputs.prompt }}
+        claude_args: |
+          ${{ steps.select.outputs.model }}
+          --max-turns ${{ steps.select.outputs.max_turns }}
+          --allowed-tools "${{ steps.select.outputs.model_tools }}"
+          --timeout-minutes ${{ steps.select.outputs.timeout_minutes }}
+          ${{ inputs.claude-args-extra }}
+
 
 inputs:
   output-file:
@@ -157,6 +195,21 @@ inputs:
     description: "Additional review instructions to include at the top of the prompt."
     required: false
     default: ""
+  anthropic-api-key:
+    description: "Anthropic API key for Claude Code (use repo/org secret)."
+    required: true
+  max-turns:
+    description: "Claude Code max interaction turns."
+    required: false
+    default: "6"
+  claude-args-extra:
+    description: "Extra flags for Claude Code CLI."
+    required: false
+    default: ""
+  force-run:
+    description: "Ignore the @claude gate and run the review on every pull_request event."
+    required: false
+    default: "false"
 
 outputs:
   prompt:
