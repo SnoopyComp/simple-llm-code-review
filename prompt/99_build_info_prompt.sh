@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-source "$GITHUB_ACTION_PATH/scripts/_lib.sh"
+source "$PROMPTDIR/_lib.sh"
 : "${WORKDIR:?WORKDIR required}"
 : "${OUT:?OUT required}"
 : "${USE_ISSUE:?USE_ISSUE}"

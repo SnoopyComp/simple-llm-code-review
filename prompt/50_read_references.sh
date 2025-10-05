@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-source "$GITHUB_ACTION_PATH/scripts/_lib.sh"
+source "$PROMPTDIR/_lib.sh"
 
 : "${WORKDIR:?WORKDIR required}"
 : "${MAX_BYTES_REF:?MAX_BYTES_REF required}"
@@ -26,7 +26,7 @@ for reference_path in "${ref_paths[@]}"; do
   if [ -f "$full_path" ]; then
     {
       printf 'FILE: %s\n\n' "$reference_path"
-      python3 "$GITHUB_ACTION_PATH/scripts/read_and_trim_file.py" "$MAX_BYTES_REF" "$full_path"
+      python3 "$PROMPTDIR/read_and_trim_file.py" "$MAX_BYTES_REF" "$full_path"
       printf '\n'
     } >> "$tmp_file"
   else

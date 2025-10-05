@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-source "$GITHUB_ACTION_PATH/scripts/_lib.sh"
+source "$PROMPTDIR/_lib.sh"
 
 : "${OUT:?OUT required}"
 : "${MODEL_COST:?MODEL_COST required}"
@@ -65,7 +65,7 @@ Scope of review:
 - Incorrect API usage or missing exception handling
 
 ⚠️ Ignore performance, readability, or code style issues.  
-Focus only on: **Can this code cause serious failures in production?**
+Focus only on: **"Can this code cause serious failures in production?"**
 EOF
       ;;
     balanced)

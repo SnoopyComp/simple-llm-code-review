@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-source "$GITHUB_ACTION_PATH/scripts/_lib.sh"
+source "$PROMPTDIR/_lib.sh"
 : "${WORKDIR:?WORKDIR required}"
 
 PR_BODY_FILE="$WORKDIR/pr_body_raw.txt"
@@ -8,7 +8,7 @@ PR_BODY_FILE="$WORKDIR/pr_body_raw.txt"
 
 : > "$WORKDIR/refs_path.txt"
 
-python3 "$GITHUB_ACTION_PATH/scripts/parse_reference_paths.py" "$PR_BODY_FILE" > "$WORKDIR/refs_path.txt" || true
+python3 "$PROMPTDIR/parse_reference_paths.py" "$PR_BODY_FILE" > "$WORKDIR/refs_path.txt" || true
 
 mapfile -t refs < "$WORKDIR/refs_path.txt" || true
 

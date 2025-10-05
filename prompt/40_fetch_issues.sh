@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-source "$GITHUB_ACTION_PATH/scripts/_lib.sh"
+source "$PROMPTDIR/_lib.sh"
 : "${WORKDIR:?WORKDIR required}"
 : "${MAX_BYTES_ISSUE:?MAX_BYTES_ISSUE required}"
 
@@ -45,6 +45,6 @@ while IFS= read -r issue_num; do
     } >> "$OUT_RAW" 
 done < "$ISSUE_LIST"
 
-python3 "$GITHUB_ACTION_PATH/scripts/clean_md.py" \
+python3 "$PROMPTDIR/clean_md.py" \
     "$OUT_RAW" \
     "$MAX_BYTES_ISSUE"

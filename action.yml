@@ -14,6 +14,7 @@ runs:
         mkdir -p "$dir"
         echo "workdir=$dir" >> "$GITHUB_OUTPUT"
         echo "WORKDIR=$dir" >> "$GITHUB_ENV"
+        echo "PROMPTDIR=$GITHUB_ACTION_PATH/prompt" >> "$GITHUB_ENV"
 
     - name: Normalize cost
       shell: bash
@@ -34,21 +35,21 @@ runs:
       env:
         WORKDIR: ${{ steps.prep.outputs.workdir }}
         MAX_BYTES_PR: ${{ inputs.max-bytes-pr }}
-      run: bash "$GITHUB_ACTION_PATH/scripts/10_read_pr.sh"
+      run: bash "$PROMPTDIR/10_read_pr.sh"
 
     - name: Extract issue numbers
       id: issues
       shell: bash
       env:
         WORKDIR: ${{ steps.prep.outputs.workdir }}
-      run: bash "$GITHUB_ACTION_PATH/scripts/20_extract_issue_numbers.sh"
+      run: bash "$PROMPTDIR/20_extract_issue_numbers.sh"
 
     - name: Extract reference paths
       id: references
       shell: bash
       env:
         WORKDIR: ${{ steps.prep.outputs.workdir }}
-      run: bash "$GITHUB_ACTION_PATH/scripts/30_extract_reference_paths.sh"
+      run: bash "$PROMPTDIR/30_extract_reference_paths.sh"
 
     - name: Normalize reference list filename
       if: steps.references.outputs.found == 'true'
@@ -69,7 +70,7 @@ runs:
         MAX_BYTES_ISSUE: ${{ inputs.max-bytes-issue }}
         GITHUB_TOKEN: ${{ github.token }}
         GH_TOKEN: ${{ github.token }}
-      run: bash "$GITHUB_ACTION_PATH/scripts/40_fetch_issues.sh"
+      run: bash "$PROMPTDIR/40_fetch_issues.sh"
 
     - name: Read reference files
       if: steps.references.outputs.found == 'true'
@@ -77,7 +78,7 @@ runs:
       env:
         WORKDIR: ${{ steps.prep.outputs.workdir }}
         MAX_BYTES_REF: ${{ inputs.max-bytes-ref }}
-      run: bash "$GITHUB_ACTION_PATH/scripts/50_read_references.sh"
+      run: bash "$PROMPTDIR/50_read_references.sh"
 
     - name: Build instruction section (90)
       shell: bash
@@ -91,7 +92,7 @@ runs:
         USE_ISSUE: ${{ steps.issues.outputs.found }}
         USE_REFERENCE: ${{ steps.references.outputs.found }}
         REVIEW_INSTRUCTIONS: ${{ inputs.instructions }}
-      run: bash "$GITHUB_ACTION_PATH/scripts/90_build_instruction_prompt.sh"
+      run: bash "$PROMPTDIR/90_build_instruction_prompt.sh"
 
     - name: Build info section (99)
       shell: bash
@@ -100,7 +101,7 @@ runs:
         OUT: ${{ steps.prep.outputs.workdir }}/_info.md
         USE_ISSUE: ${{ steps.issues.outputs.found }}
         USE_REFERENCE: ${{ steps.references.outputs.found }}
-      run: bash "$GITHUB_ACTION_PATH/scripts/99_build_info_prompt.sh"
+      run: bash "$PROMPTDIR/99_build_info_prompt.sh"
 
     - name: Assemble final prompt & set outputs
       id: finalize
