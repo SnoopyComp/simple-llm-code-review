@@ -131,20 +131,26 @@ emit_inline_policy() {
   if [ "$USE_INLINE" = "true" ]; then
     cat <<'EOF'
 ### Commenting Mode (Inline)
-- Prefer **inline comments** for specific issues.
-- If inline is not possible, post a **single summary review comment**.
-- Do **not** output findings as a normal message; publish them as **PR comments/review only**.
-- Only one pending review per PR. Do not create duplicates. If one exists, just use 'add_comment_to_pending_review'.
-- Inline comments must include full location info: subjectType, path (file path), line, side.
-- If inline fails, fallback in order: LINE → FILE → summary-only.
-- Submit only once at the end (COMMENT or REQUEST_CHANGES).
+ - Prefer **inline comments** for specific issues.
+ - Review **only code within the diff**. Do not comment on unrelated code.
+ - If inline is not possible, post a **single summary review comment**.
+ - Do **not** output findings as a normal message; publish them as **PR comments/review only**.
+ - Only one pending review per PR. Do not create duplicates. If one exists, just use 'add_comment_to_pending_review'.
+ - Each review comment must clearly specify the target code by 'line' and the correct 'side'.
+ - Inline comments must include full location info: subjectType, path (file path), line, side.
+ - For **newly added files/lines**, default to 'subjectType: "LINE"', 'side: "RIGHT"', and use the **diff line number**.
+ - If you encounter "you can only have one pending review" errors, do **not** create another; use 'add_comment_to_pending_review'.
+ - If inline fails, fallback in order: LINE → FILE → summary-only.
+ - Submit only once at the end (COMMENT or REQUEST_CHANGES).
 EOF
   else
     cat <<'EOF'
 ### Commenting Mode (No Inline)
-- **Do not use inline comments.**
-- Submit all findings as a **single consolidated review comment**.
-- Do **not** output findings as a normal message; publish them as **PR review/comment** only.
+ - **Do not use inline comments.**
+ - Review **only code within the diff**. Do not comment on unrelated code.
+ - Submit all findings as a **single consolidated review comment**.
+ - Do **not** output findings as a normal message; publish them as **PR review/comment** only.
+ EOF
 EOF
   fi
   echo
@@ -169,7 +175,8 @@ EOF
 
   echo "## Instructions"
   echo "If the PR includes requested review points, **prioritize those points over general checks**."
-  echo "Always make it clear which code each comment refers to (file path and line(s), e.g., path/to/file:12-20)."
+  echo "Do **not** summarize or restate code; provide only problems, risks, or actionable suggestions."
+  echo "Review **only code within the diff**. Do not comment on unrelated code."
   echo "Quote a minimal snippet, state the issue, explain why it matters, and give a concrete, directional fix suggestion."
   echo "Avoid vague comments; provide clear and precise feedback."
   echo
