@@ -9,6 +9,21 @@ MODEL_HIGH="--model claude-sonnet-4-5-20250929"
 MODEL_MIDDLE=""
 MODEL_LOW="--model claude-3-5-haiku-20241022"
 
+MODEL_TOOLS_LIST=(
+  mcp__github__get_me
+  mcp__github__get_pull_request
+  mcp__github__get_pull_request_files
+  mcp__github__get_pull_request_diff
+  mcp__github__create_pending_pull_request_review
+  mcp__github__add_comment_to_pending_review
+  mcp__github__submit_pending_pull_request_review
+  mcp__github_inline_comment__create_inline_comment
+  mcp__github_comment__create_comment
+  View
+  GlobTool
+  GrepTool
+)
+
 case "$DEPTH" in
   essential) base_turns=4 ;;
   balanced)  base_turns=6 ;;
@@ -34,7 +49,7 @@ case "$COST" in
   low)    model="$MODEL_LOW" ;;
 esac
 
-MODEL_TOOLS_CSV_DEFAULT="mcp__github__get_pull_request,mcp__github__get_pull_request_files,mcp__github__get_pull_request_diff,mcp__github__create_pending_pull_request_review,mcp__github__add_comment_to_pending_review,mcp__github__submit_pending_pull_request_review,mcp__github_inline_comment__create_inline_comment,mcp__github_comment__create_comment,View,GlobTool,GrepTool"
+MODEL_TOOLS_CSV_DEFAULT="$(IFS=,; printf '%s' "${MODEL_TOOLS_LIST[*]}")"
 MODEL_TOOLS_CSV="${MODEL_TOOLS_CSV:-$MODEL_TOOLS_CSV_DEFAULT}"
 
 {
