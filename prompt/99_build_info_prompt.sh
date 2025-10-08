@@ -13,6 +13,8 @@ PR_TITLE=$(cat "$WORKDIR/pr_title.txt")
 PR_NUMBER=$(cat "$WORKDIR/pr_number.txt")
 PR_BODY_CLEAN=$(cat "$WORKDIR/pr_body_clean.txt")
 PR_LABELS=$(cat "$WORKDIR/pr_labels.txt")
+PR_OWNER=$(cat "$WORKDIR/pr_owner.txt" 2>/dev/null || echo "")
+PR_REPO=$(cat "$WORKDIR/pr_repo.txt" 2>/dev/null || echo "")
 
 {
   echo "## Context"
@@ -31,6 +33,8 @@ PR_LABELS=$(cat "$WORKDIR/pr_labels.txt")
   echo "### PR"
   echo "Title: $PR_TITLE"
   echo "Number: $PR_NUMBER"
+  echo "Owner: ${PR_OWNER:-_unknown_}"
+  echo "Repo: ${PR_REPO:-_unknown_}"
   echo "Labels: ${PR_LABELS:-_none_}"
   echo "PR body:"
   printf '%s\n' "$PR_BODY_CLEAN"
