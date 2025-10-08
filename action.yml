@@ -200,7 +200,7 @@ inputs:
   max-turns:
     description: "Claude Code max interaction turns."
     required: false
-    default: "6"
+    default: ""
   claude-args-extra:
     description: "Extra flags for Claude Code CLI."
     required: false
