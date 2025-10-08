@@ -154,7 +154,6 @@ runs:
           ${{ steps.select.outputs.model }}
           --max-turns ${{ steps.select.outputs.max_turns }}
           --allowed-tools "${{ steps.select.outputs.model_tools }}"
-          --timeout-minutes ${{ steps.select.outputs.timeout_minutes }}
           ${{ inputs.claude-args-extra }}
 
 

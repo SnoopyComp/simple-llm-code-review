@@ -28,19 +28,6 @@ fi
 (( max_turns<4 )) && max_turns=4
 (( max_turns>12 )) && max_turns=12
 
-case "$DEPTH" in
-  essential) tmo=8 ;;
-  balanced)  tmo=10 ;;
-  thorough)  tmo=10 ;;
-esac
-case "$COST" in
-  low)    : ;;
-  high)   tmo=$(( tmo + 4 )) ;;
-  middle) : ;;
-esac
-(( tmo<3 )) && tmo=3
-(( tmo>30 )) && tmo=30
-
 case "$COST" in
   high)   model="$MODEL_HIGH" ;;
   middle) model="$MODEL_MIDDLE" ;;
@@ -53,6 +40,5 @@ MODEL_TOOLS_CSV="${MODEL_TOOLS_CSV:-$MODEL_TOOLS_CSV_DEFAULT}"
 {
   echo "model=$model"
   echo "max_turns=$max_turns"
-  echo "timeout_minutes=$tmo"
   echo "model_tools=$MODEL_TOOLS_CSV"
 } >> "$GITHUB_OUTPUT"
