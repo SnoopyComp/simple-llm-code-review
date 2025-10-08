@@ -134,6 +134,10 @@ emit_inline_policy() {
 - Prefer **inline comments** for specific issues.
 - If inline is not possible, post a **single summary review comment**.
 - Do **not** output findings as a normal message; publish them as **PR comments/review only**.
+- Only one pending review per PR. Do not create duplicates. If one exists, just use 'add_comment_to_pending_review'.
+- Inline comments must include full location info: subjectType, path (file path), line, side.
+- If inline fails, fallback in order: LINE → FILE → summary-only.
+- Submit only once at the end (COMMENT or REQUEST_CHANGES).
 EOF
   else
     cat <<'EOF'
