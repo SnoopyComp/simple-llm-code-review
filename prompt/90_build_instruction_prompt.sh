@@ -131,17 +131,18 @@ emit_inline_policy() {
   if [ "$USE_INLINE" = "true" ]; then
     cat <<'EOF'
 ### Commenting Mode (Inline)
- - Prefer **inline comments** for specific issues.
- - Review **only code within the diff**. Do not comment on unrelated code.
- - If inline is not possible, post a **single summary review comment**.
- - Do **not** output findings as a normal message; publish them as **PR comments/review only**.
- - Only one pending review per PR. Do not create duplicates. If one exists, just use 'add_comment_to_pending_review'.
- - Each review comment must clearly specify the target code by 'line' and the correct 'side'.
- - Inline comments must include full location info: subjectType, path (file path), line, side.
- - For **newly added files/lines**, default to 'subjectType: "LINE"', 'side: "RIGHT"', and use the **diff line number**.
- - If you encounter "you can only have one pending review" errors, do **not** create another; use 'add_comment_to_pending_review'.
- - If inline fails, fallback in order: LINE → FILE → summary-only.
- - Submit only once at the end (COMMENT or REQUEST_CHANGES).
+- Prefer **inline comments** for specific issues.
+- Review **only code within the diff**; do not comment on unrelated code.
+- Publish findings **as PR comments/review only** (no normal assistant messages).
+- **One pending review per PR**. If one exists or you see “you can only have one pending review,” reuse it via 'add_comment_to_pending_review'.
+- When calling **'mcp__github__add_comment_to_pending_review'**:
+  - Always include 'subjectType', 'path', 'body'.
+  - If 'subjectType="LINE"', also include 'line' (**PR diff** line) and 'side' ('"RIGHT"' by default; use '"LEFT"' only to target the old side).
+  - For newly added files/lines, default to 'subjectType="LINE"' and 'side="RIGHT"'.
+  - If inline placement fails once (invalid line/side/path), retry as 'subjectType="FILE"' (no line/side). If that also fails, post **a single summary review comment** at submit.
+- Fallback order: **LINE → FILE → summary-only**.
+- Submit **once at the end** ('COMMENT' or 'REQUEST_CHANGES').
+
 EOF
   else
     cat <<'EOF'
