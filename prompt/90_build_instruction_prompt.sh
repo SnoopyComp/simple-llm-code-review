@@ -131,16 +131,17 @@ emit_inline_policy() {
   if [ "$USE_INLINE" = "true" ]; then
     cat <<'EOF'
 ### Commenting Mode (Inline)
-- Prefer **inline comments** for specific issues.
-- Review **only code within the diff**; do not comment on unrelated code.
+- Prefer inline comments for specific issues; comment only on code within the diff.
+- **NEVER** include summaries, praise, or restate code. Each comment must report a problem/risk or give a concrete fix suggestion (why it matters + how to fix).
 - Publish findings **as PR comments/review only** (no normal assistant messages).
 - **One pending review per PR**. If one exists or you see “you can only have one pending review,” reuse it via 'add_comment_to_pending_review'.
 - When calling **'mcp__github__add_comment_to_pending_review'**:
   - Always include 'subjectType', 'path', 'body'.
+  - Prefer 'subjectType="LINE"' then "FILE"
   - If 'subjectType="LINE"', also include 'line' (**PR diff** line) and 'side' ('"RIGHT"' by default; use '"LEFT"' only to target the old side).
   - For newly added files/lines, default to 'subjectType="LINE"' and 'side="RIGHT"'.
-  - If inline placement fails once (invalid line/side/path), retry as 'subjectType="FILE"' (no line/side). If that also fails, post **a single summary review comment** at submit.
-- Fallback order: **LINE → FILE → summary-only**.
+  - For a line range, include startLine/startSide (range start) and use line/side as the range end.
+- Placement failure policy (no summary fallback): if inline placement fails once (invalid line/side/path), retry once by snapping to the nearest changed line in the same hunk; if it still fails, skip that comment and continue.
 - Submit **once at the end** ('COMMENT' or 'REQUEST_CHANGES').
 
 EOF
@@ -176,7 +177,7 @@ EOF
 
   echo "## Instructions"
   echo "If the PR includes requested review points, **prioritize those points over general checks**."
-  echo "Do **not** summarize or restate code; provide only problems, risks, or actionable suggestions."
+  echo "**NEVER** include summaries, praise, or restate code; provide only problems, risks, or actionable suggestions."
   echo "Review **only code within the diff**. Do not comment on unrelated code."
   echo "Quote a minimal snippet, state the issue, explain why it matters, and give a concrete, directional fix suggestion."
   echo "Avoid vague comments; provide clear and precise feedback."
