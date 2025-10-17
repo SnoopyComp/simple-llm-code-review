@@ -14,6 +14,8 @@ MODEL_TOOLS_LIST=(
   mcp__github__get_pull_request
   mcp__github__get_pull_request_files
   mcp__github__get_pull_request_diff
+  mcp__github__get_pull_request_reviews
+  mcp__github__delete_pending_pull_request_review
   mcp__github__create_pending_pull_request_review
   mcp__github__add_comment_to_pending_review
   mcp__github__submit_pending_pull_request_review
