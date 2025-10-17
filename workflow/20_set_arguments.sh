@@ -7,7 +7,7 @@ DEPTH="${DEPTH_RAW,,}"
 
 MODEL_HIGH="--model claude-sonnet-4-5-20250929"
 MODEL_MIDDLE=""
-MODEL_LOW="--model claude-3-5-haiku-20241022"
+MODEL_LOW="--model claude-haiku-4-5-20251001"
 
 MODEL_TOOLS_LIST=(
   mcp__github__get_me
