@@ -137,16 +137,15 @@ emit_inline_policy() {
 - Prefer inline comments for specific issues; comment only on code within the diff.
 - **NEVER** include summaries, praise, or restate code. Each comment must report a problem/risk or give a concrete fix suggestion (why it matters + how to fix).
 - Publish findings **as PR comments/review only** (no normal assistant messages).
+- **One pending review per PR**. If one exists or you see “you can only have one pending review,” reuse it via 'add_comment_to_pending_review'.
 - When calling **'mcp__github__add_comment_to_pending_review'**:
   - Always include 'subjectType', 'path', 'body'.
   - Prefer 'subjectType="LINE"' then "FILE"
   - If 'subjectType="LINE"', also include 'line' (**PR diff** line) and 'side' ('"RIGHT"' by default; use '"LEFT"' only to target the old side).
   - For newly added files/lines, default to 'subjectType="LINE"' and 'side="RIGHT"'.
   - For **range comments**, also include:
-  - 'startLine': **start line** of the affected range.
-  - 'line': **last line** of the affected range.
-  - 'startSide': '"RIGHT"' or '"LEFT"' (matching the start).
-  - The pair {startLine,startSide} defines the beginning and {line,side} defines the end. Both must be in the same hunk.
+    'startLine': **start line** of the affected range.
+    'line': **last line** of the affected range.
 - Placement failure policy (no summary fallback): if inline placement fails once (invalid line/side/path), retry once by snapping to the nearest changed line in the same hunk; if it still fails, skip that comment and continue.
 - Always submit at the end via mcp__github__submit_pending_pull_request_review with event: "COMMENT" and a brief body (e.g., “Automated review”). Submit even if zero comments were ultimately placed.
 
@@ -187,10 +186,7 @@ EOF
   echo "- Review **only code within the diff**. Do not comment on unrelated code."
   echo "- Quote a minimal snippet, state the issue, explain why it matters, and give a concrete, directional fix suggestion."
   echo "- Avoid vague comments; provide clear and precise feedback."
-  echo "- Pending review handling"
-  echo "Exactly one pending review per PR."
-  echo "If a pending review by this actor already exists or the API returns “you can only have one pending review,” reuse it. If reuse fails, delete your own pending review and create a new one."
-  
+
   select_prompt "$DEPTH"
   echo
 
