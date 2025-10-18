@@ -131,13 +131,13 @@ emit_inline_policy() {
   if [ "$USE_INLINE" = "true" ]; then
     cat <<'EOF'
 ### Commenting Mode (Inline)
-- **Always prefer range comments over single-line comments.**  
+- **One pending review per PR**. If one exists or you see “you can only have one pending review,” reuse it via 'add_comment_to_pending_review'.
+- **Always prefer range comments over single-line comments when using 'add_comment_to_pending_review'.(Never use 'mcp__github_inline_comment__create_inline_comment')**  
   Use a range whenever the issue spans multiple lines or a logical block.  
   Single-line comments are allowed only when the issue clearly affects a single line.
 - Prefer inline comments for specific issues; comment only on code within the diff.
 - **NEVER** include summaries, praise, or restate code. Each comment must report a problem/risk or give a concrete fix suggestion (why it matters + how to fix).
 - Publish findings **as PR comments/review only** (no normal assistant messages).
-- **One pending review per PR**. If one exists or you see “you can only have one pending review,” reuse it via 'add_comment_to_pending_review'.
 - When calling **'mcp__github__add_comment_to_pending_review'**:
   - Always include 'subjectType', 'path', 'body'.
   - Prefer 'subjectType="LINE"' then "FILE"
