@@ -113,6 +113,7 @@ runs:
         USE_ISSUE: ${{ steps.issues.outputs.found }}
         USE_REFERENCE: ${{ steps.references.outputs.found }}
         REVIEW_INSTRUCTIONS: ${{ inputs.instructions }}
+        MAX_TURNS: ${{ steps.select.outputs.max_turns }}
       run: bash "$PROMPTDIR/90_build_instruction_prompt.sh"
 
     - name: Build info section (99)
