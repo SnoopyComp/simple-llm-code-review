@@ -13,6 +13,7 @@ source "$PROMPTDIR/94_model_cost_prompt.sh"
 : "${LANGUAGE:?LANGUAGE required}"
 : "${USE_ISSUE:?USE_ISSUE required}"
 : "${USE_REFERENCE:?USE_REFERENCE required}"
+: "${MAX_TURNS:= required}"
 : "${REVIEW_INSTRUCTIONS:=}"
 
 use_issue="${USE_ISSUE,,}"
@@ -77,6 +78,6 @@ fi
   echo
 
   emit_cost_guidance "$MODEL_COST"
-  emit_inline_policy "$USE_INLINE_COMMENT"
+  emit_inline_policy "$USE_INLINE_COMMENT" $MAX_TURNS
 
 } > "$OUT"
