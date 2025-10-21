@@ -9,11 +9,12 @@ source "$PROMPTDIR/_lib.sh"
 : "${LANGUAGE:?LANGUAGE required}"
 : "${USE_ISSUE:?USE_ISSUE required}"
 : "${USE_REFERENCE:?USE_REFERENCE required}"
+: "${MAX_TURNS:= required}"
 : "${REVIEW_INSTRUCTIONS:=}"
-: "${MAX_TURNS:=}"
 
 use_issue="${USE_ISSUE,,}"
 use_ref="${USE_REFERENCE,,}"
+max_reviews=$(( MAX_TURNS - 6 ))
 
 scope_line="Use the PR details included below."
 if [[ "$use_issue" == "true" && "$use_ref" == "true" ]]; then
@@ -56,6 +57,7 @@ select_prompt() {
   case "$1" in
     essential)
       cat <<'EOF'
+
 **Goal:** Identify only **critical issues** as quickly as possible.  
 
 Scope of review:
@@ -130,7 +132,7 @@ EOF
 # --- Inline comment policy (under ## Instructions) ---
 emit_inline_policy() {
   if [ "$USE_INLINE" = "true" ]; then
-    cat <<'EOF'
+    cat <<EOF
 ### Commenting Mode (Inline)
 - **One pending review per PR**. If one exists or you see “you can only have one pending review,” reuse it via 'mcp__github__add_comment_to_pending_review'.
 - **Always prefer range comments over single-line comments when using 'mcp__github__add_comment_to_pending_review'.(Never use 'mcp__github_inline_comment__create_inline_comment')**  
@@ -148,6 +150,7 @@ emit_inline_policy() {
     'startLine': **start line** of the affected range.
     'line': **last line** of the affected range.
 - Placement failure policy (no summary fallback): if inline placement fails once (invalid line/side/path), retry once by snapping to the nearest changed line in the same hunk; if it still fails, skip that comment and continue.
+- Limit the total number of inline comments to ${max_reviews} per review. If more than n issues are found, prioritize the most critical or representative ones and omit the rest.
 - Always submit at the end via 'mcp__github__submit_pending_pull_request_review' with event: "COMMENT" and a brief body (e.g., “Automated review”). Submit even if zero comments were ultimately placed.
 
 EOF
@@ -187,7 +190,6 @@ EOF
   echo "- Review **only code within the diff**. Do not comment on unrelated code."
   echo "- Quote a minimal snippet, state the issue, explain why it matters, and give a concrete, directional fix suggestion."
   echo "- Avoid vague comments; provide clear and precise feedback."
-  echo "- 'max_turns' is ${MAX_TURNS}, so be sure to call 'mcp__github__submit_pending_pull_request_review' at the end to submit the review."
 
   select_prompt "$DEPTH"
   echo

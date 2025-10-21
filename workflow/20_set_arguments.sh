@@ -4,6 +4,7 @@ set -euo pipefail
 COST="${COST:-middle}"                     
 DEPTH_RAW="${REVIEW_DEPTH:-balanced}"  
 DEPTH="${DEPTH_RAW,,}"
+USE_INLINE_COMMENT="${USE_INLINE_COMMENT:-true}"
 
 MODEL_HIGH="--model claude-sonnet-4-5-20250929"
 MODEL_MIDDLE=""
@@ -44,6 +45,11 @@ if [[ -n "${MAX_TURNS_INPUT:-}" && "${MAX_TURNS_INPUT}" =~ ^[0-9]+$ ]]; then
 fi
 (( max_turns<4 )) && max_turns=4
 (( max_turns>12 )) && max_turns=12
+
+if [[ "$USE_INLINE_COMMENT" = "true" ]]; then
+  max_turns=$(( max_turns + 2 ))
+fi
+
 
 case "$COST" in
   high)   model="$MODEL_HIGH" ;;

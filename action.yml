@@ -45,6 +45,7 @@ runs:
         COST: ${{ env.COST }}
         REVIEW_DEPTH: ${{ inputs.review-depth }}
         MAX_TURNS_INPUT: ${{ inputs.max-turns }}
+        USE_INLINE_COMMENT:  ${{ inputs.use-inline-review }}
       run: bash "$WORKFLOWDIR/20_set_arguments.sh"
 
     - name: Read PR from event payload (10)
