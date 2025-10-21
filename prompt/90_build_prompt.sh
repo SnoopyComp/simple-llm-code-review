@@ -3,7 +3,8 @@ set -euo pipefail
 source "$PROMPTDIR/_lib.sh"
 source "$PROMPTDIR/91_instruction.sh"
 source "$PROMPTDIR/92_review_depth.sh"
-source "$PROMPTDIR/93_inline_comment_prompt.sh"
+source "$PROMPTDIR/93_2_inline_comment_prompt.sh"
+source "$PROMPTDIR/93_1_overall_review.sh"
 source "$PROMPTDIR/94_model_cost_prompt.sh"
 
 : "${OUT:?OUT required}"
@@ -78,6 +79,8 @@ fi
   echo
 
   emit_cost_guidance "$MODEL_COST"
+  
+  overall_review
   emit_inline_policy "$USE_INLINE_COMMENT" $MAX_TURNS
 
 } > "$OUT"

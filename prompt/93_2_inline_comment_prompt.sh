@@ -4,7 +4,7 @@ emit_inline_policy() {
   max_reviews=$(( $2 - 6 ))
   if [ "$1" = "true" ]; then
     cat <<EOF
-### Commenting Mode (Inline)
+### Inline Reviews
 - **One pending review per PR**. If one exists or you see “you can only have one pending review,” reuse it via 'mcp__github__add_comment_to_pending_review'.
 - **Always prefer range comments over single-line comments when using 'mcp__github__add_comment_to_pending_review'.(Never use 'mcp__github_inline_comment__create_inline_comment')**  
     Use a range whenever the issue spans multiple lines or a logical block.  
