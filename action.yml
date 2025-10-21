@@ -113,9 +113,9 @@ runs:
         LANGUAGE: ${{ inputs.language }}
         USE_ISSUE: ${{ steps.issues.outputs.found }}
         USE_REFERENCE: ${{ steps.references.outputs.found }}
-        REVIEW_INSTRUCTIONS: ${{ inputs.instructions }}
         MAX_TURNS: ${{ steps.select.outputs.max_turns }}
-      run: bash "$PROMPTDIR/90_build_instruction_prompt.sh"
+        REVIEW_INSTRUCTIONS: ${{ inputs.instructions }}
+      run: bash "$PROMPTDIR/90_build_prompt.sh"
 
     - name: Build info section (99)
       if: ${{ inputs.force-run == 'true' || steps.gate.outputs.run == 'true' }}
