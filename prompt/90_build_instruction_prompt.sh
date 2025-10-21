@@ -178,18 +178,19 @@ EOF
   echo "Use $LANGUAGE in all review comments."
   echo
 
+  echo "## Instructions"
+  echo "- If the PR body includes any specific requests or questions for the reviewer — such as asking for feedback on certain parts or suggestions for improvement — please focus your review on those points."
+  echo "- **NEVER** include summaries, or restate code; provide only problems, risks, or actionable suggestions."
+  echo "- Review **only code within the diff**. Do not comment on unrelated code."
+  echo "- Quote a minimal snippet, state the issue, explain why it matters, and give a concrete, directional fix suggestion."
+  echo "- Avoid vague comments; provide clear and precise feedback."
+
+
   if [ -n "$REVIEW_INSTRUCTIONS" ]; then
     echo "## User Instructions"
     echo "User Instructions override any conflicting guidance below."
     printf '%s\n\n' "$REVIEW_INSTRUCTIONS"
   fi
-
-  echo "## Instructions"
-  echo "- If the PR includes requested review points, **prioritize those points over general checks**."
-  echo "- **NEVER** include summaries, praise, or restate code; provide only problems, risks, or actionable suggestions."
-  echo "- Review **only code within the diff**. Do not comment on unrelated code."
-  echo "- Quote a minimal snippet, state the issue, explain why it matters, and give a concrete, directional fix suggestion."
-  echo "- Avoid vague comments; provide clear and precise feedback."
 
   select_prompt "$DEPTH"
   echo
