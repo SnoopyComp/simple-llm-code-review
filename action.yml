@@ -45,6 +45,7 @@ runs:
         COST: ${{ env.COST }}
         REVIEW_DEPTH: ${{ inputs.review-depth }}
         MAX_TURNS_INPUT: ${{ inputs.max-turns }}
+        USE_INLINE_COMMENT:  ${{ inputs.use-inline-review }}
       run: bash "$WORKFLOWDIR/20_set_arguments.sh"
 
     - name: Read PR from event payload (10)
@@ -112,8 +113,9 @@ runs:
         LANGUAGE: ${{ inputs.language }}
         USE_ISSUE: ${{ steps.issues.outputs.found }}
         USE_REFERENCE: ${{ steps.references.outputs.found }}
+        MAX_TURNS: ${{ steps.select.outputs.max_turns }}
         REVIEW_INSTRUCTIONS: ${{ inputs.instructions }}
-      run: bash "$PROMPTDIR/90_build_instruction_prompt.sh"
+      run: bash "$PROMPTDIR/90_build_prompt.sh"
 
     - name: Build info section (99)
       if: ${{ inputs.force-run == 'true' || steps.gate.outputs.run == 'true' }}

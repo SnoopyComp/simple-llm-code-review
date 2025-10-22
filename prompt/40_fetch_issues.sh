@@ -39,7 +39,7 @@ while IFS= read -r issue_num; do
         echo "Issue title: $title"
         echo "Labels: $labels"
         echo "Body:"
-        [ -n "$body_raw" ] && printf '%s\n' "$body_raw" || echo "_(empty body)_"
+        [ -n "$body_raw" ] && printf '\n```%s\n```\n' "$body_raw" || echo "_(empty body)_"
         echo "---"
         echo
     } >> "$OUT_RAW" 

@@ -37,7 +37,7 @@ PR_REPO=$(cat "$WORKDIR/pr_repo.txt" 2>/dev/null || echo "")
   echo "Repo: ${PR_REPO:-_unknown_}"
   echo "Labels: ${PR_LABELS:-_none_}"
   echo "PR body:"
-  printf '%s\n' "$PR_BODY_CLEAN"
+  printf '\n```%s\n```\n' "$PR_BODY_CLEAN"
 
   if [[ "$use_ref" == "true" ]]; then
     echo

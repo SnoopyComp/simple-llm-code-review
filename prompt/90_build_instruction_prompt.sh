@@ -9,10 +9,12 @@ source "$PROMPTDIR/_lib.sh"
 : "${LANGUAGE:?LANGUAGE required}"
 : "${USE_ISSUE:?USE_ISSUE required}"
 : "${USE_REFERENCE:?USE_REFERENCE required}"
+: "${MAX_TURNS:= required}"
 : "${REVIEW_INSTRUCTIONS:=}"
 
 use_issue="${USE_ISSUE,,}"
 use_ref="${USE_REFERENCE,,}"
+max_reviews=$(( MAX_TURNS - 6 ))
 
 scope_line="Use the PR details included below."
 if [[ "$use_issue" == "true" && "$use_ref" == "true" ]]; then
@@ -55,6 +57,7 @@ select_prompt() {
   case "$1" in
     essential)
       cat <<'EOF'
+
 **Goal:** Identify only **critical issues** as quickly as possible.  
 
 Scope of review:
@@ -129,22 +132,36 @@ EOF
 # --- Inline comment policy (under ## Instructions) ---
 emit_inline_policy() {
   if [ "$USE_INLINE" = "true" ]; then
-    cat <<'EOF'
+    cat <<EOF
 ### Commenting Mode (Inline)
-- Prefer **inline comments** for specific issues.
-- If inline is not possible, post a **single summary review comment**.
-- Do **not** output findings as a normal message; publish them as **PR comments/review only**.
-- Only one pending review per PR. Do not create duplicates. If one exists, just use 'add_comment_to_pending_review'.
-- Inline comments must include full location info: subjectType, path (file path), line, side.
-- If inline fails, fallback in order: LINE → FILE → summary-only.
-- Submit only once at the end (COMMENT or REQUEST_CHANGES).
+- **One pending review per PR**. If one exists or you see “you can only have one pending review,” reuse it via 'mcp__github__add_comment_to_pending_review'.
+- **Always prefer range comments over single-line comments when using 'mcp__github__add_comment_to_pending_review'.(Never use 'mcp__github_inline_comment__create_inline_comment')**  
+  Use a range whenever the issue spans multiple lines or a logical block.  
+  Single-line comments are allowed only when the issue clearly affects a single line.
+- Prefer inline comments for specific issues; comment only on code within the diff.
+- **NEVER** include summaries, praise, or restate code. Each comment must report a problem/risk or give a concrete fix suggestion (why it matters + how to fix).
+- Publish findings **as PR comments/review only** (no normal assistant messages).
+- When calling **'mcp__github__add_comment_to_pending_review'**:
+  - Always include 'subjectType', 'path', 'body'.
+  - Prefer 'subjectType="LINE"' then "FILE"
+  - If 'subjectType="LINE"', also include 'line' (**PR diff** line) and 'side' ('"RIGHT"' by default; use '"LEFT"' only to target the old side).
+  - For newly added files/lines, default to 'subjectType="LINE"' and 'side="RIGHT"'.
+  - For **range comments**, also include:
+    'startLine': **start line** of the affected range.
+    'line': **last line** of the affected range.
+- Placement failure policy (no summary fallback): if inline placement fails once (invalid line/side/path), retry once by snapping to the nearest changed line in the same hunk; if it still fails, skip that comment and continue.
+- Limit the total number of inline comments to ${max_reviews} per review. If more than n issues are found, prioritize the most critical or representative ones and omit the rest.
+- Always submit at the end via 'mcp__github__submit_pending_pull_request_review' with event: "COMMENT" and a brief body (e.g., “Automated review”). Submit even if zero comments were ultimately placed.
+
 EOF
   else
     cat <<'EOF'
 ### Commenting Mode (No Inline)
-- **Do not use inline comments.**
-- Submit all findings as a **single consolidated review comment**.
-- Do **not** output findings as a normal message; publish them as **PR review/comment** only.
+ - **Do not use inline comments.**
+ - Review **only code within the diff**. Do not comment on unrelated code.
+ - Submit all findings as a **single consolidated review comment**.
+ - Do **not** output findings as a normal message; publish them as **PR review/comment** only.
+ EOF
 EOF
   fi
   echo
@@ -161,18 +178,20 @@ EOF
   echo "Use $LANGUAGE in all review comments."
   echo
 
+  echo "## Instructions"
+  echo "- If the PR body includes any specific requests or questions for the reviewer — such as asking for feedback on certain parts or suggestions for improvement — please focus your review on those points."
+  echo "- **NEVER** include summaries, or restate code; provide only problems, risks, or actionable suggestions."
+  echo "- Review **only code within the diff**. Do not comment on unrelated code."
+  echo "- Quote a minimal snippet, state the issue, explain why it matters, and give a concrete, directional fix suggestion."
+  echo "- Avoid vague comments; provide clear and precise feedback."
+
+
   if [ -n "$REVIEW_INSTRUCTIONS" ]; then
     echo "## User Instructions"
     echo "User Instructions override any conflicting guidance below."
     printf '%s\n\n' "$REVIEW_INSTRUCTIONS"
   fi
 
-  echo "## Instructions"
-  echo "If the PR includes requested review points, **prioritize those points over general checks**."
-  echo "Always make it clear which code each comment refers to (file path and line(s), e.g., path/to/file:12-20)."
-  echo "Quote a minimal snippet, state the issue, explain why it matters, and give a concrete, directional fix suggestion."
-  echo "Avoid vague comments; provide clear and precise feedback."
-  echo
   select_prompt "$DEPTH"
   echo
 
