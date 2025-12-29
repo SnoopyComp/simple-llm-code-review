@@ -48,7 +48,7 @@ jobs:
           fetch-depth: 0
 
       - name: Simple LLM Code Review
-        uses: SnoopyComp/simple-llm-code-review@latest
+        uses: codingbaraGo/simple-llm-code-review@latest
         with:
           anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
           language: english
