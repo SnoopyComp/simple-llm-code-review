@@ -3,7 +3,7 @@
 emit_inline_policy() {
   max_reviews=$(( $2 - 6 ))
   if [ "$1" = "true" ]; then
-    cat <<EOF
+    cat <<'EOF'
 ### Inline Reviews
 
 #### Core Principles
@@ -91,7 +91,6 @@ EOF
  - Review **only code within the diff**. Do not comment on unrelated code.
  - Submit all findings as a **single consolidated review comment**.
  - Do **not** output findings as a normal message; publish them as **PR review/comment** only.
- EOF
 EOF
   fi
   echo
