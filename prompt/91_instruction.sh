@@ -7,5 +7,4 @@ common_instructions() {
 - Review **only code within the diff**. Do not comment on unrelated code.
 - **Avoid vague or abstract feedback.** All comments should be clear, direct, and specific to the code being reviewed.
 EOF
-    echo
 }

@@ -58,6 +58,7 @@ fi
 
 # --- Write prompt file ---
 {
+  echo
   echo "# LLM Code Review Prompt"
   echo
   echo "## Role"
