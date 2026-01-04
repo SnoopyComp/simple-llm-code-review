@@ -147,6 +147,7 @@ runs:
 
     - name: Run Claude Code review
       if: ${{ inputs.force-run == 'true' || steps.gate.outputs.run == 'true' }}
+      continue-on-error: true
       uses: anthropics/claude-code-action@v1
       with:
         anthropic_api_key: ${{ inputs.anthropic-api-key }}
@@ -158,6 +159,12 @@ runs:
           --allowed-tools "${{ steps.select.outputs.model_tools }}"
           ${{ inputs.claude-args-extra }}
 
+    - name: Upload Claude execution log
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: claude-execution-output
+        path: /home/runner/work/_temp/claude-execution-output.json
 
 inputs:
   output-file:
