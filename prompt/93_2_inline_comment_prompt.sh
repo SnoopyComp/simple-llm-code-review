@@ -16,6 +16,7 @@ emit_inline_policy() {
 - **Default 'side'** is "RIGHT" for new code; use "LEFT" only when referring to the old side of the diff.
 - **One pending review per PR.**
   Reuse an existing one if necessary, and submit at the end using 'mcp__github__submit_pending_pull_request_review' ('event: "COMMENT"').
+- The `body` field must be written as **plain Markdown text**.
 EOF
 
   printf '%s\n' "- Limit to ${max_reviews} total comments per review."
@@ -34,7 +35,7 @@ If 'startLine' is missing, it will be treated as a single-line comment.
 **Placement rule:**
 'startLine' marks the first affected line; 'line' should be placed about **two lines below** the last affected line to improve visibility in diffs.
 
-**Example JSON:**
+**Structure reference only (do NOT escape body content):**
 ```json
 {
   "subjectType": "LINE",
@@ -42,7 +43,7 @@ If 'startLine' is missing, it will be treated as a single-line comment.
   "startLine": <start line>,
   "line": <end line>,
   "side": "RIGHT",
-  "body": "<your comment here>"
+  "body": "<Markdown comment text (use real newlines)>"
 }
 ```
 
@@ -53,14 +54,14 @@ If the issue affects **exactly one line** and no surrounding context is needed.
 **Rule for 'line':**
 'line' must point exactly to the line that contains the code being discussed or reviewed.
 
-**Example JSON:**
+**Structure reference only (do NOT escape body content):**
 ```json
 {
   "subjectType": "LINE",
   "path": "<file path>",
   "line": <line number>,
   "side": "RIGHT",
-  "body": "<your comment here>"
+  "body": "<Markdown comment text (use real newlines)>"
 }
 ```
 
@@ -69,12 +70,12 @@ If the issue affects **exactly one line** and no surrounding context is needed.
 Use this when feedback applies to the **entire file** or a structural/design aspect rather than any specific line.
 Do not use it for code issues tied to individual lines.
 
-**Example JSON:**
+**Structure reference only (do NOT escape body content):**
 ```json
 {
   "subjectType": "FILE",
   "path": "<file path>",
-  "body": "<your comment here>"
+  "body": "<Markdown comment text (use real newlines)>"
 }
 ```
 
