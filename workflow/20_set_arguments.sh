@@ -28,10 +28,10 @@ MODEL_TOOLS_LIST=(
 )
 
 case "$DEPTH" in
-  essential) base_turns=5 ;;
-  balanced)  base_turns=8 ;;
-  thorough)  base_turns=10 ;;
-  *)         base_turns=8 ; DEPTH="balanced" ;;
+  essential) base_turns=7 ;;
+  balanced)  base_turns=10 ;;
+  thorough)  base_turns=14 ;;
+  *)         base_turns=10 ; DEPTH="balanced" ;;
 esac
 
 case "$COST" in
@@ -44,7 +44,7 @@ if [[ -n "${MAX_TURNS_INPUT:-}" && "${MAX_TURNS_INPUT}" =~ ^[0-9]+$ ]]; then
   max_turns="$MAX_TURNS_INPUT"
 fi
 (( max_turns<4 )) && max_turns=4
-(( max_turns>12 )) && max_turns=12
+(( max_turns>20 )) && max_turns=20
 
 if [[ "$USE_INLINE_COMMENT" = "true" ]]; then
   max_turns=$(( max_turns + 2 ))

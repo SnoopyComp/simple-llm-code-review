@@ -16,8 +16,12 @@ emit_inline_policy() {
 - **Default 'side'** is "RIGHT" for new code; use "LEFT" only when referring to the old side of the diff.
 - **One pending review per PR.**
   Reuse an existing one if necessary, and submit at the end using 'mcp__github__submit_pending_pull_request_review' ('event: "COMMENT"').
-- Limit to '${max_reviews}' total comments per review.
-  If more issues exist, prioritize the most critical or representative ones.
+EOF
+
+  printf '%s\n' "- Limit to ${max_reviews} total comments per review."
+  printf '%s\n' "  If more issues exist, prioritize the most critical or representative ones."
+
+  cat <<'EOF'
 
 #### 1. Range-Line Comment  *(Highest Priority)*
 **When to use:**
