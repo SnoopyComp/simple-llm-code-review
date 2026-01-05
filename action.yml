@@ -160,7 +160,7 @@ runs:
           ${{ inputs.claude-args-extra }}
 
     - name: Upload Claude execution log
-      if: always()
+      if: ${{inputs.upload-log == 'true'}}
       uses: actions/upload-artifact@v4
       with:
         name: claude-execution-output
@@ -218,6 +218,11 @@ inputs:
     description: "Ignore the @claude gate and run the review on every pull_request event."
     required: false
     default: "false"
+  upload-log:
+    description: "Whether to upload the Claude Code execution log as a GitHub Actions artifact (useful for debugging or auditing)."
+    required: false
+    default: "false"
+
 
 outputs:
   prompt:
